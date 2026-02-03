@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: LifeGuide
     
     steps:
       - name: Checkout Source
@@ -21,11 +24,9 @@ jobs:
           cache-dependency-path: LifeGuide/package-lock.json
 
       - name: Install Dependencies
-        working-directory: LifeGuide
         run: npm install
 
       - name: Build Web Assets
-        working-directory: LifeGuide
         run: npm run build
 
       - name: Setup Java
@@ -35,24 +36,19 @@ jobs:
           java-version: '17'
 
       - name: Initialize Capacitor
-        working-directory: LifeGuide
         run: echo "Capacitor config should exist"
 
       - name: Add Android Platform
-        working-directory: LifeGuide
         run: npx cap add android || echo "Android platform might already exist"
 
       - name: Sync Capacitor
-        working-directory: LifeGuide
         run: npx cap sync android
 
       - name: Grant Execute Permission to Gradlew
-        working-directory: LifeGuide/android
-        run: chmod +x gradlew
+        run: chmod +x android/gradlew
 
       - name: Build APK
-        working-directory: LifeGuide/android
-        run: ./gradlew assembleDebug
+        run: ./android/gradlew assembleDebug -p android
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
