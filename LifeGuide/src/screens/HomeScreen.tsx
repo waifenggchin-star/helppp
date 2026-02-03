@@ -1,69 +1,102 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Play, Settings, BarChart3 } from 'lucide-react-native';
-import { useTheme } from '../context/ThemeContext';
+import { MessageSquare, ListTodo, FolderKanban, ChevronRight } from 'lucide-react-native';
+
+const { width } = Dimensions.get('window');
 
 export const HomeScreen = ({ navigation }: any) => {
-  const { theme } = useTheme();
 
-  const handleStartTask = () => {
-    // 暂时先跳转到之前的列表页，或者根据需求调整
-    // 这里我们假设原来的列表就是"开始任务"的入口
-    // 如果没有专门的任务列表页，可以暂时弹窗或不做操作
-    // 但为了体验，我们尝试复用现有的逻辑，或者展示原来的分类列表
-    // 鉴于之前的布局是直接展示列表，这里我们可以把"开始任务"定义为展示分类选择
-    // 为了简单起见，暂时保留当前页面的列表逻辑，或者创建一个新页面。
-    // 但用户要求"改成...首页"，说明原来的列表可能要移到别处。
-    // 既然用户只说了首页 UI，那点击"开始任务"我让它显示原来的场景列表吧。
-    // 但是这里我没有创建新页面，所以只能在当前页面通过状态控制，或者假设有一个 'TaskSelection' 页面。
-    // 为了不报错，我先只打印 log 或 Alert。
-    Alert.alert("提示", "功能开发中...");
+  const handleSmartChat = () => {
+    Alert.alert("智能对话", "即将接入 AI 助手...");
   };
 
-  const handleSettings = () => {
-    Alert.alert("设置", "设置中心开发中...");
+  const handleTaskList = () => {
+    // 假设这是原来的“生活场景百科”入口
+    Alert.alert("任务清单", "正在加载生活任务...");
   };
 
-  const handleProgress = () => {
-    Alert.alert("进度", "查看进度功能开发中...");
+  const handleMyProjects = () => {
+    Alert.alert("我的项目", "查看我的进度...");
   };
+
+  const CardButton = ({ 
+    title, 
+    subtitle, 
+    icon: Icon, 
+    onPress, 
+    color 
+  }: { 
+    title: string; 
+    subtitle: string; 
+    icon: any; 
+    onPress: () => void; 
+    color: string;
+  }) => (
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
+      <LinearGradient
+        colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)']}
+        style={styles.cardGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <View style={[styles.iconBox, { backgroundColor: color }]}>
+          <Icon size={28} color="#FFF" />
+        </View>
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle}>{title}</Text>
+          <Text style={styles.cardSubtitle}>{subtitle}</Text>
+        </View>
+        <ChevronRight size={24} color="rgba(255,255,255,0.4)" />
+      </LinearGradient>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        // 深色渐变：从深蓝/紫到黑色
-        colors={['#1e3c72', '#2a5298', '#000000']}
+        // 深蓝 (#0f172a) -> 紫色 (#581c87) -> 深黑 (#000000)
+        colors={['#0f172a', '#3b0764', '#000000']}
         style={styles.background}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
         <SafeAreaView style={styles.safeArea}>
-          <View style={styles.contentContainer}>
-            <View style={styles.headerContainer}>
-              <Text style={styles.welcomeText}>Helppp 助手</Text>
-              <Text style={styles.subText}>你的生活生存指南</Text>
-            </View>
+          <View style={styles.header}>
+            <Text style={styles.appTitle}>Helppp AI 助手</Text>
+            <View style={styles.titleUnderline} />
+            <Text style={styles.appSlogan}>你的全能生活向导</Text>
+          </View>
 
-            <View style={styles.buttonGroup}>
-              <TouchableOpacity style={styles.actionButton} onPress={handleStartTask}>
-                <View style={styles.iconCircle}>
-                  <Play size={32} color="#FFF" fill="#FFF" />
-                </View>
-                <Text style={styles.buttonText}>开始任务</Text>
-              </TouchableOpacity>
-
-              <View style={styles.rowButtons}>
-                <TouchableOpacity style={[styles.smallButton, { marginRight: 15 }]} onPress={handleSettings}>
-                  <Settings size={24} color="#FFF" />
-                  <Text style={styles.smallButtonText}>设置中心</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.smallButton} onPress={handleProgress}>
-                  <BarChart3 size={24} color="#FFF" />
-                  <Text style={styles.smallButtonText}>查看进度</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+          <View style={styles.cardContainer}>
+            <CardButton 
+              title="智能对话" 
+              subtitle="有问题？随时问我"
+              icon={MessageSquare}
+              onPress={handleSmartChat}
+              color="#8b5cf6" // Violet
+            />
+            
+            <CardButton 
+              title="任务清单" 
+              subtitle="生活技能 Step-by-Step"
+              icon={ListTodo}
+              onPress={handleTaskList}
+              color="#ec4899" // Pink
+            />
+            
+            <CardButton 
+              title="我的项目" 
+              subtitle="查看学习与成长进度"
+              icon={FolderKanban}
+              onPress={handleMyProjects}
+              color="#3b82f6" // Blue
+            />
+          </View>
+          
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Powered by Trae & Gemini</Text>
           </View>
         </SafeAreaView>
       </LinearGradient>
@@ -80,83 +113,86 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    paddingHorizontal: 24,
   },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
-    padding: 24,
-  },
-  headerContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  header: {
+    marginTop: 40,
+    marginBottom: 50,
     alignItems: 'center',
   },
-  welcomeText: {
-    fontSize: 42,
-    fontWeight: 'bold',
+  appTitle: {
+    fontSize: 36,
+    fontWeight: '800',
     color: '#FFFFFF',
-    marginBottom: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    // 发光效果
+    textShadowColor: 'rgba(139, 92, 246, 0.8)', // 紫色光晕
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 20,
+    marginBottom: 8,
   },
-  subText: {
-    fontSize: 18,
-    color: '#E0E0E0',
+  titleUnderline: {
+    width: 60,
+    height: 4,
+    backgroundColor: '#8b5cf6',
+    borderRadius: 2,
+    marginBottom: 16,
+  },
+  appSlogan: {
+    fontSize: 16,
+    color: '#cbd5e1',
+    letterSpacing: 1,
     opacity: 0.8,
   },
-  buttonGroup: {
-    width: '100%',
-    paddingBottom: 40,
-  },
-  actionButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 20,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  iconCircle: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#4facfe',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 20,
-    shadowColor: '#4facfe',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  buttonText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  rowButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  smallButton: {
+  cardContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    gap: 20,
+  },
+  card: {
+    width: '100%',
+    height: 100,
+    borderRadius: 24,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  smallButtonText: {
+  cardGradient: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  iconBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  cardContent: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#FFFFFF',
-    marginTop: 8,
-    fontWeight: '600',
-    fontSize: 14,
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: '#cbd5e1',
+  },
+  footer: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+  footerText: {
+    color: 'rgba(255, 255, 255, 0.3)',
+    fontSize: 12,
   },
 });

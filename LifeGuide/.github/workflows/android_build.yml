@@ -25,18 +25,23 @@ jobs:
       - name: Build Web Assets
         run: npm run build
 
-      - name: Add Android Platform
-        # 尝试添加 Android 平台，如果已存在则忽略错误
-        run: npx cap add android || echo "Android platform might already exist"
-
-      - name: Sync Capacitor
-        run: npx cap sync android
-
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
+
+      - name: Initialize Capacitor
+        # Initialize Capacitor if config is missing (safety check) or just rely on sync
+        # We assume capacitor.config.ts exists in repo
+        run: echo "Capacitor config should exist"
+
+      - name: Add Android Platform
+        # Try to add android platform, ignore if it exists
+        run: npx cap add android || echo "Android platform might already exist"
+
+      - name: Sync Capacitor
+        run: npx cap sync android
 
       - name: Build APK
         working-directory: android
