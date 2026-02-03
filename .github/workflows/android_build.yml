@@ -17,7 +17,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          # cache: 'npm' # Uncomment if package-lock.json exists
+          cache: 'npm'
+          cache-dependency-path: LifeGuide/package-lock.json
 
       - name: Install Dependencies
         working-directory: LifeGuide
@@ -44,6 +45,10 @@ jobs:
       - name: Sync Capacitor
         working-directory: LifeGuide
         run: npx cap sync android
+
+      - name: Grant Execute Permission to Gradlew
+        working-directory: LifeGuide/android
+        run: chmod +x gradlew
 
       - name: Build APK
         working-directory: LifeGuide/android
