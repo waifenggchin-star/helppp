@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.lifeguide.app',
-  appName: 'LifeGuide',
+  appName: 'helppp',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
