@@ -9,14 +9,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // IMPORTANT: In a real app, this should be in an environment variable (e.g. process.env.EXPO_PUBLIC_GEMINI_API_KEY)
 // For this demo, we'll use a placeholder. User needs to replace this.
 const API_KEY = 'AIzaSyD4DQaTaIDzBNAMGxrOUg7S5fUMEkk7leM'; 
-const genAI = new GoogleGenerativeAI(API_KEY);
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-}
 
 export const ChatScreen = ({ navigation }: any) => {
   const { colors, typography, spacing } = useTheme();
@@ -46,6 +38,8 @@ export const ChatScreen = ({ navigation }: any) => {
     setIsLoading(true);
 
     try {
+      // Initialize Gemini only when needed to prevent app crash on load
+      const genAI = new GoogleGenerativeAI(API_KEY);
       // Use Gemini Pro model
       const model = genAI.getGenerativeModel({ model: "gemini-pro"});
       
