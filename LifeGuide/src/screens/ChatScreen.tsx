@@ -10,6 +10,13 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // For this demo, we'll use a placeholder. User needs to replace this.
 const API_KEY = 'AIzaSyD4DQaTaIDzBNAMGxrOUg7S5fUMEkk7leM'; 
 
+interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'bot';
+  timestamp: Date;
+}
+
 export const ChatScreen = ({ navigation }: any) => {
   const { colors, typography, spacing } = useTheme();
   const [inputText, setInputText] = useState('');
