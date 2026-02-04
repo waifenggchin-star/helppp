@@ -3,12 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Activity
 import { useTheme } from '../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Send, Bot, User } from 'lucide-react-native';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize Gemini API
-// IMPORTANT: In a real app, this should be in an environment variable (e.g. process.env.EXPO_PUBLIC_GEMINI_API_KEY)
-// For this demo, we'll use a placeholder. User needs to replace this.
-const API_KEY = 'AIzaSyD4DQaTaIDzBNAMGxrOUg7S5fUMEkk7leM'; 
+// MOCK DATA ONLY - NO API CALLS
+const MOCK_RESPONSE = "这是测试模式。你的问题我已经收到，但我现在没有连接大脑（API已移除）。请在后续版本中恢复 API 连接。";
 
 interface Message {
   id: string;
@@ -23,7 +20,7 @@ export const ChatScreen = ({ navigation }: any) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: '你好！我是 Helppp 智能助手。有什么不懂的流程，随时问我！\n\n例如：\n“怎么申请国际驾照？”\n“护照丢了怎么办？”',
+      text: '你好！我是 Helppp 智能助手（离线版）。\n\n目前我只能进行简单的回应测试。',
       sender: 'bot',
       timestamp: new Date()
     }
@@ -44,44 +41,17 @@ export const ChatScreen = ({ navigation }: any) => {
     setInputText('');
     setIsLoading(true);
 
-    try {
-      // Initialize Gemini only when needed to prevent app crash on load
-      const genAI = new GoogleGenerativeAI(API_KEY);
-      // Use Gemini Pro model
-      const model = genAI.getGenerativeModel({ model: "gemini-pro"});
-      
-      // Context prompt to ensure simplified, China-specific answers
-      const prompt = `
-        你是一个专门帮助中国国内人群（特别是老年人和认知水平较低者）的社会生存助手。
-        请使用简体中文，语气亲切，将复杂的流程简化为 1, 2, 3 步。
-        请熟悉中国国内的政务（如 12345 ）、医疗、交通系统。
-        针对这个问题：${userMsg.text}
-      `;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-
-      const botMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        text: text,
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, botMsg]);
-    } catch (error) {
-      console.error(error);
-      const errorMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "抱歉，我暂时连接不上大脑了。请检查网络或 API Key 设置。",
-        sender: 'bot',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMsg]);
-    } finally {
-      setIsLoading(false);
-    }
+    // Simulate network delay
+    setTimeout(() => {
+        const botMsg: Message = {
+            id: (Date.now() + 1).toString(),
+            text: MOCK_RESPONSE,
+            sender: 'bot',
+            timestamp: new Date()
+        };
+        setMessages(prev => [...prev, botMsg]);
+        setIsLoading(false);
+    }, 1000);
   };
 
   const renderItem = ({ item }: { item: Message }) => {
@@ -98,19 +68,19 @@ export const ChatScreen = ({ navigation }: any) => {
         )}
         <View style={[
           styles.bubble, 
-          isBot ? 
-            { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border } : 
-            { backgroundColor: colors.primary }
+          isBot ? { backgroundColor: colors.card, borderTopLeftRadius: 4 } : { backgroundColor: colors.primary, borderTopRightRadius: 4 },
+          { padding: spacing.padding }
         ]}>
           <Text style={[
             styles.messageText, 
-            { color: isBot ? colors.text : '#FFF', fontSize: typography.baseSize }
+            { fontSize: typography.baseSize },
+            isBot ? { color: colors.text } : { color: '#FFF' }
           ]}>
             {item.text}
           </Text>
         </View>
         {!isBot && (
-          <View style={[styles.avatar, { backgroundColor: '#9ca3af', marginLeft: 8, marginRight: 0 }]}>
+          <View style={[styles.avatar, { backgroundColor: colors.secondary, marginLeft: 8, marginRight: 0 }]}>
             <User size={20} color="#FFF" />
           </View>
         )}
@@ -122,55 +92,61 @@ export const ChatScreen = ({ navigation }: any) => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <ArrowLeft color={colors.text} size={24} />
+          <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text, fontSize: typography.titleSize }]}>
-          智能对话
+        <Text style={[styles.headerTitle, { color: colors.text, fontSize: typography.headerSize }]}>
+          智能助手 (离线测试)
         </Text>
+        <View style={{ width: 24 }} />
       </View>
 
       <FlatList
         data={messages}
         renderItem={renderItem}
         keyExtractor={item => item.id}
-        contentContainerStyle={{ padding: spacing.padding }}
-        style={{ flex: 1 }}
+        contentContainerStyle={[styles.listContent, { padding: spacing.padding }]}
+        inverted={false}
       />
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        style={[styles.inputContainer, { borderTopColor: colors.border, backgroundColor: colors.card }]}
       >
-        <View style={[styles.inputContainer, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
-          <TextInput
-            style={[
-              styles.input, 
-              { 
-                backgroundColor: colors.background, 
-                color: colors.text,
-                fontSize: typography.baseSize,
-                borderRadius: spacing.borderRadius,
-                borderColor: colors.border
-              }
-            ]}
-            placeholder="请输入您的问题..."
-            placeholderTextColor={colors.subText}
-            value={inputText}
-            onChangeText={setInputText}
-            multiline
-          />
-          <TouchableOpacity 
-            style={[styles.sendButton, { backgroundColor: colors.primary }]} 
-            onPress={sendMessage}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#FFF" size="small" />
-            ) : (
-              <Send size={20} color="#FFF" />
-            )}
-          </TouchableOpacity>
-        </View>
+        <TextInput
+          style={[
+            styles.input, 
+            { 
+              backgroundColor: colors.background, 
+              color: colors.text,
+              fontSize: typography.baseSize,
+              padding: spacing.padding,
+              borderRadius: spacing.borderRadius
+            }
+          ]}
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder="请输入问题..."
+          placeholderTextColor={colors.subText}
+          multiline
+        />
+        <TouchableOpacity 
+          onPress={sendMessage} 
+          disabled={isLoading || inputText.trim().length === 0}
+          style={[
+            styles.sendButton, 
+            { 
+              backgroundColor: colors.primary,
+              opacity: (isLoading || inputText.trim().length === 0) ? 0.5 : 1
+            }
+          ]}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#FFF" size="small" />
+          ) : (
+            <Send size={24} color="#FFF" />
+          )}
+        </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -183,14 +159,19 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
   },
   backButton: {
-    marginRight: 16,
+    padding: 4,
   },
   headerTitle: {
     fontWeight: 'bold',
+  },
+  listContent: {
+    paddingBottom: 20,
   },
   messageContainer: {
     flexDirection: 'row',
@@ -198,49 +179,43 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
   },
   botMessageContainer: {
-    alignSelf: 'flex-start',
-    marginRight: 40,
+    justifyContent: 'flex-start',
+    paddingRight: 40,
   },
   userMessageContainer: {
-    alignSelf: 'flex-end',
     justifyContent: 'flex-end',
-    marginLeft: 40,
+    paddingLeft: 40,
   },
   avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 8,
   },
   bubble: {
-    padding: 12,
     borderRadius: 16,
-    maxWidth: '85%',
+    maxWidth: '100%',
   },
   messageText: {
-    lineHeight: 22,
+    lineHeight: 24,
   },
   inputContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     padding: 12,
-    alignItems: 'flex-end',
     borderTopWidth: 1,
   },
   input: {
     flex: 1,
-    minHeight: 40,
     maxHeight: 100,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderWidth: 1,
     marginRight: 12,
   },
   sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },

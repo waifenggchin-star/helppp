@@ -9,6 +9,7 @@ export interface Theme {
     text: string;
     subText: string;
     primary: string;
+    secondary: string;
     card: string;
     border: string;
     flashCardBg: string;
@@ -36,6 +37,7 @@ const themes: Record<UserMode, Theme> = {
       text: '#1F2937',
       subText: '#6B7280',
       primary: '#3B82F6',
+      secondary: '#10B981',
       card: '#FFFFFF',
       border: '#E5E7EB',
       flashCardBg: '#FFFBEB',
@@ -61,6 +63,7 @@ const themes: Record<UserMode, Theme> = {
       text: '#000000',
       subText: '#333333',
       primary: '#D946EF', // 高饱和度
+      secondary: '#16A34A',
       card: '#FFF7ED',
       border: '#000000',
       flashCardBg: '#FEF3C7',
@@ -86,6 +89,7 @@ const themes: Record<UserMode, Theme> = {
       text: '#F4F4F5',
       subText: '#A1A1AA',
       primary: '#2DD4BF',
+      secondary: '#34D399',
       card: '#27272A',
       border: '#3F3F46',
       flashCardBg: '#3F3F46',

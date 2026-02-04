@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Step } from '../data/scenarios';
-import { MessageCircleQuestion, Image as ImageIcon, Volume2 } from 'lucide-react-native';
+import { Image as ImageIcon } from 'lucide-react-native';
 import { FlashCard } from './FlashCard';
-import * as Speech from 'expo-speech';
 
 interface StepItemProps {
   step: Step;
@@ -14,14 +13,6 @@ interface StepItemProps {
 export const StepItem: React.FC<StepItemProps> = ({ step, index }) => {
   const { theme } = useTheme();
   const [flashCardVisible, setFlashCardVisible] = useState(false);
-
-  const handleSpeak = () => {
-    const textToSpeak = `${step.action}. ${step.description || ''}`;
-    Speech.speak(textToSpeak, {
-      language: 'zh-CN', // Or 'ms-MY' if preferred, but content is Chinese
-      rate: 0.9,
-    });
-  };
 
   return (
     <View style={[
@@ -50,13 +41,6 @@ export const StepItem: React.FC<StepItemProps> = ({ step, index }) => {
         <Text style={[styles.title, { color: theme.colors.text, fontSize: theme.typography.stepTitleSize }]}>
           {step.action}
         </Text>
-        
-        {/* Elder Mode TTS Button */}
-        {theme.mode === 'elder' && (
-          <TouchableOpacity onPress={handleSpeak} style={styles.speakButton}>
-            <Volume2 size={32} color={theme.colors.primary} />
-          </TouchableOpacity>
-        )}
       </View>
 
       {step.description && (
@@ -98,32 +82,27 @@ export const StepItem: React.FC<StepItemProps> = ({ step, index }) => {
       {step.flashCard && (
         <TouchableOpacity 
           style={[
-            styles.helpBtn, 
+            styles.flashCardButton,
             { 
-              backgroundColor: theme.colors.primary,
               marginTop: theme.spacing.gap,
-              padding: theme.spacing.padding / 1.5,
-              borderRadius: theme.spacing.borderRadius
+              backgroundColor: theme.colors.secondary + '20', // 20% opacity
+              padding: 10,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: theme.colors.secondary
             }
           ]}
           onPress={() => setFlashCardVisible(true)}
         >
-          <MessageCircleQuestion color="#FFF" size={24 * theme.typography.scale} />
-          <Text style={[
-            styles.helpBtnText, 
-            { 
-              fontSize: theme.typography.baseSize,
-              marginLeft: 8
-            }
-          ]}>
-            我该怎么问？
+          <Text style={{ color: theme.colors.secondary, fontWeight: 'bold', textAlign: 'center', fontSize: theme.typography.baseSize }}>
+            {theme.mode === 'elder' ? '点我看：求助小抄' : '查看求助话术'}
           </Text>
         </TouchableOpacity>
       )}
 
       {step.flashCard && (
-        <FlashCard 
-          visible={flashCardVisible} 
+        <FlashCard
+          visible={flashCardVisible}
           onClose={() => setFlashCardVisible(false)}
           title={step.flashCard.title}
           content={step.flashCard.content}
@@ -135,7 +114,14 @@ export const StepItem: React.FC<StepItemProps> = ({ step, index }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   header: {
     flexDirection: 'row',
@@ -147,7 +133,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   badgeText: {
-    color: '#FFF',
+    color: 'white',
     fontWeight: 'bold',
   },
   title: {
@@ -158,20 +144,15 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   description: {
+    // Styling handled in render
   },
   imagePlaceholder: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderStyle: 'dashed',
     borderWidth: 1,
+    borderStyle: 'dashed',
   },
-  helpBtn: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  helpBtnText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-  },
+  flashCardButton: {
+    // Styling handled in render
+  }
 });
