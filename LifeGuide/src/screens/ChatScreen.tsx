@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { ArrowLeft, Send, Bot, User } from 'lucide-react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// API Key (Note: In production use env vars)
+const API_KEY = 'AIzaSyD4DQaTaIDzBNAMGxrOUg7S5fUMEkk7leM'; 
 
 interface Message {
   id: string;
@@ -17,11 +21,23 @@ export const ChatScreen = ({ navigation }: any) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'AI 功能暂时关闭维护中。',
+      text: '你好！我是 Helppp 智能助手。有什么不懂的流程，随时问我！',
       sender: 'bot',
       timestamp: new Date()
     }
   ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [genAI, setGenAI] = useState<GoogleGenerativeAI | null>(null);
+
+  useEffect(() => {
+    // Async initialization
+    try {
+      const ai = new GoogleGenerativeAI(API_KEY);
+      setGenAI(ai);
+    } catch (error) {
+      console.error("AI Init Error:", error);
+    }
+  }, []);
 
   const sendMessage = async () => {
     if (inputText.trim().length === 0) return;
@@ -34,6 +50,49 @@ export const ChatScreen = ({ navigation }: any) => {
     };
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
+    setIsLoading(true);
+
+    try {
+      if (!genAI) throw new Error("AI not initialized");
+
+      const model = genAI.getGenerativeModel({ model: "gemini-pro"});
+      const prompt = `
+        你是一个专门帮助中国国内人群（特别是老年人）的社会生存助手。
+        请使用简体中文，语气亲切，将复杂的流程简化。
+        针对这个问题：${userMsg.text}
+      `;
+
+      // 3秒超时竞赛
+      const aiPromise = model.generateContent(prompt);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Timeout")), 3000)
+      );
+
+      const result: any = await Promise.race([aiPromise, timeoutPromise]);
+      const response = await result.response;
+      const text = response.text();
+
+      const botMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: text,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMsg]);
+
+    } catch (error) {
+      console.log("AI Error or Timeout:", error);
+      // Fallback message
+      const fallbackMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: '[本地预设] 您可以问我关于挂号或乘车的问题',
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, fallbackMsg]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderMessage = ({ item }: { item: Message }) => {
@@ -109,13 +168,21 @@ export const ChatScreen = ({ navigation }: any) => {
             placeholder="输入您的问题..."
             placeholderTextColor={colors.textSecondary}
             multiline
+            editable={!isLoading}
           />
           <TouchableOpacity 
             onPress={sendMessage}
-            style={[styles.sendButton, { backgroundColor: colors.primary }]}
-            disabled={!inputText.trim()}
+            style={[
+              styles.sendButton, 
+              { backgroundColor: isLoading ? colors.subText : colors.primary }
+            ]}
+            disabled={!inputText.trim() || isLoading}
           >
-            <Send size={20} color="#fff" />
+            {isLoading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Send size={20} color="#fff" />
+            )}
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

@@ -21,6 +21,11 @@ export interface Theme {
     stepTitleSize: number;
     flashCardSize: number;
     scale: number;
+    h1: { fontSize: number; lineHeight: number };
+    h2: { fontSize: number; lineHeight: number };
+    h3: { fontSize: number; lineHeight: number };
+    body: { fontSize: number; lineHeight: number };
+    caption: { fontSize: number; lineHeight: number };
   };
   spacing: {
     padding: number;
@@ -49,6 +54,11 @@ const themes: Record<UserMode, Theme> = {
       stepTitleSize: 18,
       flashCardSize: 28,
       scale: 1,
+      h1: { fontSize: 32, lineHeight: 40 },
+      h2: { fontSize: 24, lineHeight: 32 },
+      h3: { fontSize: 20, lineHeight: 28 },
+      body: { fontSize: 16, lineHeight: 24 },
+      caption: { fontSize: 14, lineHeight: 20 },
     },
     spacing: {
       padding: 16,
@@ -62,7 +72,7 @@ const themes: Record<UserMode, Theme> = {
       background: '#FFFFFF',
       text: '#000000',
       subText: '#333333',
-      primary: '#D946EF', // 高饱和度
+      primary: '#D946EF', // High saturation
       secondary: '#16A34A',
       card: '#FFF7ED',
       border: '#000000',
@@ -70,11 +80,17 @@ const themes: Record<UserMode, Theme> = {
       flashCardText: '#000000',
     },
     typography: {
-      baseSize: 24,
-      titleSize: 36,
-      stepTitleSize: 28,
-      flashCardSize: 40,
+      baseSize: 28,
+      titleSize: 40,
+      stepTitleSize: 32,
+      flashCardSize: 44,
       scale: 1.5,
+      // FORCE 28px MINIMUM for body
+      h1: { fontSize: 48, lineHeight: 56 },
+      h2: { fontSize: 40, lineHeight: 48 },
+      h3: { fontSize: 32, lineHeight: 40 },
+      body: { fontSize: 28, lineHeight: 40 }, // Strong enforcement
+      caption: { fontSize: 24, lineHeight: 32 },
     },
     spacing: {
       padding: 24,
@@ -101,11 +117,16 @@ const themes: Record<UserMode, Theme> = {
       stepTitleSize: 22,
       flashCardSize: 32,
       scale: 1.25,
+      h1: { fontSize: 36, lineHeight: 44 },
+      h2: { fontSize: 28, lineHeight: 36 },
+      h3: { fontSize: 24, lineHeight: 32 },
+      body: { fontSize: 20, lineHeight: 30 },
+      caption: { fontSize: 16, lineHeight: 24 },
     },
     spacing: {
       padding: 20,
       gap: 20,
-      borderRadius: 4,
+      borderRadius: 16,
     },
   },
 };
@@ -114,6 +135,9 @@ interface ThemeContextType {
   theme: Theme;
   mode: UserMode;
   setMode: (mode: UserMode) => void;
+  colors: Theme['colors'];
+  typography: Theme['typography'];
+  spacing: Theme['spacing'];
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -121,18 +145,25 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [mode, setMode] = useState<UserMode>('default');
 
-  const value = {
-    theme: themes[mode],
-    mode,
-    setMode,
-  };
+  const theme = themes[mode];
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ 
+      theme, 
+      mode, 
+      setMode,
+      colors: theme.colors,
+      typography: theme.typography,
+      spacing: theme.spacing
+    }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 };
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
