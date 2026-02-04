@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Step } from '../data/scenarios';
-import { MessageCircleQuestion, Image as ImageIcon } from 'lucide-react-native';
+import { MessageCircleQuestion, Image as ImageIcon, Volume2 } from 'lucide-react-native';
 import { FlashCard } from './FlashCard';
+import * as Speech from 'expo-speech';
 
 interface StepItemProps {
   step: Step;
@@ -13,6 +14,14 @@ interface StepItemProps {
 export const StepItem: React.FC<StepItemProps> = ({ step, index }) => {
   const { theme } = useTheme();
   const [flashCardVisible, setFlashCardVisible] = useState(false);
+
+  const handleSpeak = () => {
+    const textToSpeak = `${step.action}. ${step.description || ''}`;
+    Speech.speak(textToSpeak, {
+      language: 'zh-CN', // Or 'ms-MY' if preferred, but content is Chinese
+      rate: 0.9,
+    });
+  };
 
   return (
     <View style={[
@@ -41,6 +50,13 @@ export const StepItem: React.FC<StepItemProps> = ({ step, index }) => {
         <Text style={[styles.title, { color: theme.colors.text, fontSize: theme.typography.stepTitleSize }]}>
           {step.action}
         </Text>
+        
+        {/* Elder Mode TTS Button */}
+        {theme.mode === 'elder' && (
+          <TouchableOpacity onPress={handleSpeak} style={styles.speakButton}>
+            <Volume2 size={32} color={theme.colors.primary} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {step.description && (
@@ -137,6 +153,9 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: 'bold',
     flex: 1,
+  },
+  speakButton: {
+    padding: 8,
   },
   description: {
   },
