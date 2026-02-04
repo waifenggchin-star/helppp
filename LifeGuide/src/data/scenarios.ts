@@ -3,16 +3,12 @@ export interface Step {
   action: string;
   description?: string;
   imagePlaceholder: string;
-  flashCard?: {
-    title: string;
-    content: string;
-  };
 }
 
 export interface Scenario {
   id: string;
   title: string;
-  category: 'transport' | 'medical' | 'docs' | 'daily';
+  category: 'medical';
   icon: string;
   encouragement: string;
   steps: Step[];
@@ -20,17 +16,17 @@ export interface Scenario {
 
 export const scenarios: Scenario[] = [
   {
-    id: 'hospital_mock',
-    title: '医院挂号',
+    id: 'hospital_reg_cn',
+    title: '医院挂号 (纯文字版)',
     category: 'medical',
     icon: 'stethoscope',
-    encouragement: '测试模式',
+    encouragement: '测试模式：仅包含基础数据。',
     steps: [
       {
         id: 'h1',
-        action: '启动测试',
-        description: '如果能看到这段文字，说明数据加载正常。',
-        imagePlaceholder: '无'
+        action: '手机预约挂号',
+        description: '这是测试数据。如果不白屏，说明基础环境正常。',
+        imagePlaceholder: '无图片'
       }
     ]
   }

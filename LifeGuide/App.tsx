@@ -5,7 +5,6 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Helppp 启动成功</Text>
-      <Text style={styles.subText}>当前为纯净测试模式</Text>
     </View>
   );
 }
@@ -13,18 +12,13 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
   },
   text: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'black',
-    marginBottom: 10,
+    color: '#333333',
   },
-  subText: {
-    fontSize: 16,
-    color: 'gray',
-  }
 });

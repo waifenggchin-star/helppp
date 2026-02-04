@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Send, Bot, User } from 'lucide-react-native';
-
-// MOCK DATA ONLY - NO API CALLS
-const MOCK_RESPONSE = "这是测试模式。你的问题我已经收到，但我现在没有连接大脑（API已移除）。请在后续版本中恢复 API 连接。";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Message {
   id: string;
@@ -20,12 +17,11 @@ export const ChatScreen = ({ navigation }: any) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: '你好！我是 Helppp 智能助手（离线版）。\n\n目前我只能进行简单的回应测试。',
+      text: 'AI 功能暂时关闭维护中。',
       sender: 'bot',
       timestamp: new Date()
     }
   ]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = async () => {
     if (inputText.trim().length === 0) return;
@@ -36,52 +32,40 @@ export const ChatScreen = ({ navigation }: any) => {
       sender: 'user',
       timestamp: new Date()
     };
-
     setMessages(prev => [...prev, userMsg]);
     setInputText('');
-    setIsLoading(true);
-
-    // Simulate network delay
-    setTimeout(() => {
-        const botMsg: Message = {
-            id: (Date.now() + 1).toString(),
-            text: MOCK_RESPONSE,
-            sender: 'bot',
-            timestamp: new Date()
-        };
-        setMessages(prev => [...prev, botMsg]);
-        setIsLoading(false);
-    }, 1000);
   };
 
-  const renderItem = ({ item }: { item: Message }) => {
-    const isBot = item.sender === 'bot';
+  const renderMessage = ({ item }: { item: Message }) => {
+    const isUser = item.sender === 'user';
     return (
       <View style={[
-        styles.messageContainer, 
-        isBot ? styles.botMessageContainer : styles.userMessageContainer
+        styles.messageContainer,
+        isUser ? styles.userMessage : styles.botMessage,
       ]}>
-        {isBot && (
+        {!isUser && (
           <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-            <Bot size={20} color="#FFF" />
+            <Bot size={16} color="#fff" />
           </View>
         )}
         <View style={[
-          styles.bubble, 
-          isBot ? { backgroundColor: colors.card, borderTopLeftRadius: 4 } : { backgroundColor: colors.primary, borderTopRightRadius: 4 },
-          { padding: spacing.padding }
+          styles.bubble,
+          { 
+            backgroundColor: isUser ? colors.primary : colors.card,
+            borderTopLeftRadius: isUser ? 16 : 4,
+            borderTopRightRadius: isUser ? 4 : 16,
+          }
         ]}>
           <Text style={[
-            styles.messageText, 
-            { fontSize: typography.baseSize },
-            isBot ? { color: colors.text } : { color: '#FFF' }
+            styles.messageText,
+            { color: isUser ? '#fff' : colors.text }
           ]}>
             {item.text}
           </Text>
         </View>
-        {!isBot && (
-          <View style={[styles.avatar, { backgroundColor: colors.secondary, marginLeft: 8, marginRight: 0 }]}>
-            <User size={20} color="#FFF" />
+        {isUser && (
+          <View style={[styles.avatar, { backgroundColor: colors.secondary }]}>
+            <User size={16} color="#fff" />
           </View>
         )}
       </View>
@@ -94,59 +78,46 @@ export const ChatScreen = ({ navigation }: any) => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text, fontSize: typography.headerSize }]}>
-          智能助手 (离线测试)
+        <Text style={[styles.title, { color: colors.text, ...typography.h2 }]}>
+          智能助手
         </Text>
-        <View style={{ width: 24 }} />
       </View>
 
       <FlatList
         data={messages}
-        renderItem={renderItem}
+        renderItem={renderMessage}
         keyExtractor={item => item.id}
-        contentContainerStyle={[styles.listContent, { padding: spacing.padding }]}
-        inverted={false}
+        contentContainerStyle={styles.listContent}
       />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-        style={[styles.inputContainer, { borderTopColor: colors.border, backgroundColor: colors.card }]}
       >
-        <TextInput
-          style={[
-            styles.input, 
-            { 
-              backgroundColor: colors.background, 
-              color: colors.text,
-              fontSize: typography.baseSize,
-              padding: spacing.padding,
-              borderRadius: spacing.borderRadius
-            }
-          ]}
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="请输入问题..."
-          placeholderTextColor={colors.subText}
-          multiline
-        />
-        <TouchableOpacity 
-          onPress={sendMessage} 
-          disabled={isLoading || inputText.trim().length === 0}
-          style={[
-            styles.sendButton, 
-            { 
-              backgroundColor: colors.primary,
-              opacity: (isLoading || inputText.trim().length === 0) ? 0.5 : 1
-            }
-          ]}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#FFF" size="small" />
-          ) : (
-            <Send size={24} color="#FFF" />
-          )}
-        </TouchableOpacity>
+        <View style={[styles.inputContainer, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
+          <TextInput
+            style={[
+              styles.input,
+              { 
+                backgroundColor: colors.background,
+                color: colors.text,
+                ...typography.body
+              }
+            ]}
+            value={inputText}
+            onChangeText={setInputText}
+            placeholder="输入您的问题..."
+            placeholderTextColor={colors.textSecondary}
+            multiline
+          />
+          <TouchableOpacity 
+            onPress={sendMessage}
+            style={[styles.sendButton, { backgroundColor: colors.primary }]}
+            disabled={!inputText.trim()}
+          >
+            <Send size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -159,32 +130,29 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    padding: 16,
     borderBottomWidth: 1,
   },
   backButton: {
-    padding: 4,
+    marginRight: 16,
   },
-  headerTitle: {
+  title: {
     fontWeight: 'bold',
   },
   listContent: {
-    paddingBottom: 20,
+    padding: 16,
+    paddingBottom: 32,
   },
   messageContainer: {
     flexDirection: 'row',
     marginBottom: 16,
-    maxWidth: '100%',
+    alignItems: 'flex-end',
   },
-  botMessageContainer: {
-    justifyContent: 'flex-start',
-    paddingRight: 40,
-  },
-  userMessageContainer: {
+  userMessage: {
     justifyContent: 'flex-end',
-    paddingLeft: 40,
+  },
+  botMessage: {
+    justifyContent: 'flex-start',
   },
   avatar: {
     width: 32,
@@ -192,30 +160,35 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
+    marginHorizontal: 8,
   },
   bubble: {
+    maxWidth: '75%',
+    padding: 12,
     borderRadius: 16,
-    maxWidth: '100%',
   },
   messageText: {
+    fontSize: 16,
     lineHeight: 24,
   },
   inputContainer: {
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
     borderTopWidth: 1,
   },
   input: {
     flex: 1,
-    maxHeight: 100,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     marginRight: 12,
+    maxHeight: 100,
   },
   sendButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },
